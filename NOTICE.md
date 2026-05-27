@@ -1,6 +1,6 @@
 # Notice
 
-OMME is an independent wrapper for running Logitech Onboard Memory Manager
+logi-omm-wine is an independent wrapper for running Logitech Onboard Memory Manager
 under Wine. It is not affiliated with, endorsed by, or supported by Logitech.
 
 This repository does not include the Logitech Onboard Memory Manager Windows

@@ -28,7 +28,7 @@ workflow:
       '  just build' \
       '' \
       'NixOS integration:' \
-      '  enable omme.nixosModules.default with programs.omme.enable = true' \
+      '  enable logiOmmWine.nixosModules.default with programs.logi-omm-wine.enable = true' \
       '  rebuild NixOS, then reconnect the Logitech mouse'
 
 # Verify the local tools used by this repository.
@@ -60,14 +60,14 @@ develop:
 
 # Run local shell syntax and fake-PATH runtime contract tests.
 test:
-    bash -n bin/omme bin/omme-init bin/omme-init-gui bin/omme-debug tests/runtime-contract.sh
+    bash -n bin/logi-omm-wine bin/logi-omm-wine-init bin/logi-omm-wine-init-gui bin/logi-omm-wine-debug tests/runtime-contract.sh
     tests/runtime-contract.sh
 
 # Evaluate flake outputs, package checks, and the NixOS module.
 check:
     nix flake check
 
-# Build the default OMME package.
+# Build the default logi-omm-wine package.
 build:
     nix build .#
 

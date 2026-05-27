@@ -17,18 +17,18 @@ case "${1:-}" in
   "")
     ;;
   *)
-    printf 'Usage: omme-init [--force]\n' >&2
+    printf 'Usage: logi-omm-wine-init [--force]\n' >&2
     exit 2
     ;;
 esac
 
 if [ "$#" -ne 0 ]; then
-  printf 'Usage: omme-init [--force]\n' >&2
+  printf 'Usage: logi-omm-wine-init [--force]\n' >&2
   exit 2
 fi
 
-wineprefix="${OMME_WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
-marker="$wineprefix/.omme-initialized-$init_contract_version"
+wineprefix="${LOGI_OMM_WINE_PREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/logi-omm-wine/prefix}"
+marker="$wineprefix/.logi-omm-wine-initialized-$init_contract_version"
 
 script_dir="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
@@ -36,22 +36,22 @@ script_dir="$(
 )"
 
 find_exe() {
-  if [ "${OMME_EXE:-}" != "" ]; then
-    printf '%s\n' "$OMME_EXE"
+  if [ "${LOGI_OMM_WINE_EXE:-}" != "" ]; then
+    printf '%s\n' "$LOGI_OMM_WINE_EXE"
     return 0
   fi
 
-  if [ "${OMME_DATA_DIR:-}" != "" ] && [ -f "$OMME_DATA_DIR/$exe_name" ]; then
-    printf '%s\n' "$OMME_DATA_DIR/$exe_name"
+  if [ "${LOGI_OMM_WINE_DATA_DIR:-}" != "" ] && [ -f "$LOGI_OMM_WINE_DATA_DIR/$exe_name" ]; then
+    printf '%s\n' "$LOGI_OMM_WINE_DATA_DIR/$exe_name"
     return 0
   fi
 
-  if [ -f "$script_dir/../share/omme/$exe_name" ]; then
-    printf '%s\n' "$script_dir/../share/omme/$exe_name"
+  if [ -f "$script_dir/../share/logi-omm-wine/$exe_name" ]; then
+    printf '%s\n' "$script_dir/../share/logi-omm-wine/$exe_name"
     return 0
   fi
 
-  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/omme"
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/logi-omm-wine"
   if [ -f "$cache_dir/$download_name" ]; then
     printf '%s\n' "$cache_dir/$download_name"
     return 0
@@ -70,7 +70,7 @@ verify_exe() {
 }
 
 download_exe() {
-  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/omme"
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/logi-omm-wine"
   cache_path="$cache_dir/$download_name"
   mkdir -p "$cache_dir"
 
@@ -80,17 +80,17 @@ download_exe() {
     return 0
   fi
 
-  if [ "${OMME_ALLOW_DOWNLOAD:-}" != "1" ]; then
+  if [ "${LOGI_OMM_WINE_ALLOW_DOWNLOAD:-}" != "1" ]; then
     cat >&2 <<EOF
 Logitech Onboard Memory Manager executable was not found.
-Set OMME_EXE, set OMME_DATA_DIR, install $exe_name under share/omme, or allow a verified runtime download:
-  OMME_ALLOW_DOWNLOAD=1 omme-init
+Set LOGI_OMM_WINE_EXE, set LOGI_OMM_WINE_DATA_DIR, install $exe_name under share/logi-omm-wine, or allow a verified runtime download:
+  LOGI_OMM_WINE_ALLOW_DOWNLOAD=1 logi-omm-wine-init
 EOF
     exit 1
   fi
 
   if ! command -v curl >/dev/null 2>&1; then
-    printf 'curl is required when OMME_ALLOW_DOWNLOAD=1 and no local executable exists.\n' >&2
+    printf 'curl is required when LOGI_OMM_WINE_ALLOW_DOWNLOAD=1 and no local executable exists.\n' >&2
     exit 1
   fi
 
@@ -117,7 +117,7 @@ mkdir -p "$wineprefix"
 
 export WINEPREFIX="$wineprefix"
 export WINEARCH=win64
-export WINEDEBUG="${OMME_WINEDEBUG:--all}"
+export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
 export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
 wineboot -i
@@ -130,4 +130,4 @@ wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
 
 touch "$marker"
 
-printf 'Initialized OMME Wine prefix using %s\n' "$exe_path"
+printf 'Initialized logi-omm-wine Wine prefix using %s\n' "$exe_path"

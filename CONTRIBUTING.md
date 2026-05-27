@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome when they keep OMME small, auditable, and packageable.
+Contributions are welcome when they keep logi-omm-wine small, auditable, and packageable.
 
 Before submitting a change, run:
 

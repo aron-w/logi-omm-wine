@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export LOGI_OMM_WINE_DEBUG="${LOGI_OMM_WINE_DEBUG:-+plugplay,+hid,+hid_report,+setupapi,+winebus}"
+
+script_dir="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
+  pwd -P
+)"
+
+if [ -x "$script_dir/logi-omm-wine" ]; then
+  exec "$script_dir/logi-omm-wine" "$@"
+fi
+
+exec logi-omm-wine "$@"

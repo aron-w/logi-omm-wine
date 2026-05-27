@@ -5,7 +5,7 @@ repo_root="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1
   pwd -P
 )"
-script_dir="${OMME_TEST_BIN_DIR:-$repo_root/bin}"
+script_dir="${LOGI_OMM_WINE_TEST_BIN_DIR:-$repo_root/bin}"
 
 tmp_root="$(mktemp -d)"
 base_path="$PATH"
@@ -35,9 +35,9 @@ reset_fake_path() {
   export HOME="$tmp_root/home"
   export XDG_DATA_HOME="$tmp_root/home/data"
   export XDG_CACHE_HOME="$tmp_root/home/cache"
-  export OMME_WINEPREFIX="$tmp_root/home/prefix"
+  export LOGI_OMM_WINE_PREFIX="$tmp_root/home/prefix"
   export PATH="$tmp_root/bin:$base_path"
-  unset OMME_EXE OMME_DATA_DIR OMME_ALLOW_DOWNLOAD OMME_WINEDEBUG
+  unset LOGI_OMM_WINE_EXE LOGI_OMM_WINE_DATA_DIR LOGI_OMM_WINE_ALLOW_DOWNLOAD LOGI_OMM_WINE_DEBUG
 
   write_fake "$tmp_root/bin/wine" <<'EOF'
 printf 'wine' >>"$TEST_LOG"
@@ -81,55 +81,55 @@ EOF
 }
 
 reset_fake_path
-if bash "$script_dir/omme" >/dev/null 2>"$tmp_root/stderr"; then
-  fail "omme without marker should fail"
+if bash "$script_dir/logi-omm-wine" >/dev/null 2>"$tmp_root/stderr"; then
+  fail "logi-omm-wine without marker should fail"
 fi
 assert_log ""
 
 reset_fake_path
-mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-dotnet48"
-export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
-touch "$OMME_EXE"
-if bash "$script_dir/omme" --example >/dev/null 2>"$tmp_root/stderr"; then
-  fail "omme with legacy marker should fail"
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-dotnet48"
+export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$LOGI_OMM_WINE_EXE"
+if bash "$script_dir/logi-omm-wine" --example >/dev/null 2>"$tmp_root/stderr"; then
+  fail "logi-omm-wine with legacy marker should fail"
 fi
 assert_log ""
 
 reset_fake_path
-mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-v2"
-export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
-touch "$OMME_EXE"
-bash "$script_dir/omme" --example
-assert_log "wine <$OMME_EXE> <--example>"
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v2"
+export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$LOGI_OMM_WINE_EXE"
+bash "$script_dir/logi-omm-wine" --example
+assert_log "wine <$LOGI_OMM_WINE_EXE> <--example>"
 
 reset_fake_path
-mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-v2"
-bash "$script_dir/omme-init"
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v2"
+bash "$script_dir/logi-omm-wine-init"
 assert_log ""
 
 reset_fake_path
-mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-v2"
-export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
-touch "$OMME_EXE"
-bash "$script_dir/omme-init" --force >/dev/null
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v2"
+export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$LOGI_OMM_WINE_EXE"
+bash "$script_dir/logi-omm-wine-init" --force >/dev/null
 assert_log "wineboot <-i>
 winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
 
 reset_fake_path
-if bash "$script_dir/omme-init" >/dev/null 2>"$tmp_root/stderr"; then
-  fail "omme-init without exe or OMME_ALLOW_DOWNLOAD should fail"
+if bash "$script_dir/logi-omm-wine-init" >/dev/null 2>"$tmp_root/stderr"; then
+  fail "logi-omm-wine-init without exe or LOGI_OMM_WINE_ALLOW_DOWNLOAD should fail"
 fi
 assert_log ""
 
 reset_fake_path
-export OMME_ALLOW_DOWNLOAD=1
-bash "$script_dir/omme-init" >/dev/null
+export LOGI_OMM_WINE_ALLOW_DOWNLOAD=1
+bash "$script_dir/logi-omm-wine-init" >/dev/null
 assert_log "curl
 wineboot <-i>
 winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
@@ -137,10 +137,10 @@ wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enab
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
 
 reset_fake_path
-export OMME_ALLOW_DOWNLOAD=1
+export LOGI_OMM_WINE_ALLOW_DOWNLOAD=1
 export TEST_SHA256SUM=invalid
-if bash "$script_dir/omme-init" >/dev/null 2>"$tmp_root/stderr"; then
-  fail "omme-init should reject invalid download hash"
+if bash "$script_dir/logi-omm-wine-init" >/dev/null 2>"$tmp_root/stderr"; then
+  fail "logi-omm-wine-init should reject invalid download hash"
 fi
 assert_log "curl"
 

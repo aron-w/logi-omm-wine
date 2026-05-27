@@ -3,6 +3,6 @@
 ## Unreleased
 
 - Split runtime behavior into portable checked-in scripts.
-- Added explicit Wine prefix initialization through `omme-init`.
+- Added explicit Wine prefix initialization through `logi-omm-wine-init`.
 - Added a NixOS module and generic Logitech hidraw udev rule.
 - Selected Wine's GDI renderer during prefix initialization for OMM stability.

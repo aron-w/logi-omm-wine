@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+omme_version="2.6.1749"
+init_contract_version="v2"
+exe_name="OnboardMemoryManager.exe"
+download_name="OnboardMemoryManager_${omme_version}.exe"
+
+wineprefix="${LOGI_OMM_WINE_PREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/logi-omm-wine/prefix}"
+marker="$wineprefix/.logi-omm-wine-initialized-$init_contract_version"
+
+script_dir="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
+  pwd -P
+)"
+
+find_exe() {
+  if [ "${LOGI_OMM_WINE_EXE:-}" != "" ]; then
+    printf '%s\n' "$LOGI_OMM_WINE_EXE"
+    return 0
+  fi
+
+  if [ "${LOGI_OMM_WINE_DATA_DIR:-}" != "" ] && [ -f "$LOGI_OMM_WINE_DATA_DIR/$exe_name" ]; then
+    printf '%s\n' "$LOGI_OMM_WINE_DATA_DIR/$exe_name"
+    return 0
+  fi
+
+  if [ -f "$script_dir/../share/logi-omm-wine/$exe_name" ]; then
+    printf '%s\n' "$script_dir/../share/logi-omm-wine/$exe_name"
+    return 0
+  fi
+
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/logi-omm-wine"
+  if [ -f "$cache_dir/$download_name" ]; then
+    printf '%s\n' "$cache_dir/$download_name"
+    return 0
+  fi
+
+  return 1
+}
+
+if [ ! -e "$marker" ]; then
+  cat >&2 <<EOF
+logi-omm-wine Wine prefix is not initialized.
+Run logi-omm-wine-init first, or run logi-omm-wine-init --force to repair an existing prefix.
+Prefix: $wineprefix
+EOF
+  exit 1
+fi
+
+if ! exe_path="$(find_exe)"; then
+  cat >&2 <<EOF
+Logitech Onboard Memory Manager executable was not found.
+Set LOGI_OMM_WINE_EXE, set LOGI_OMM_WINE_DATA_DIR, install $exe_name under share/logi-omm-wine, or run:
+  LOGI_OMM_WINE_ALLOW_DOWNLOAD=1 logi-omm-wine-init
+EOF
+  exit 1
+fi
+
+export WINEPREFIX="$wineprefix"
+export WINEARCH=win64
+export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
+
+exec wine "$exe_path" "$@"

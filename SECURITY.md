@@ -1,6 +1,6 @@
 # Security
 
-OMME is a wrapper around Wine and proprietary vendor software. It does not
+logi-omm-wine is a wrapper around Wine and proprietary vendor software. It does not
 modify mouse firmware directly; Logitech Onboard Memory Manager performs device
 communication through Wine.
 

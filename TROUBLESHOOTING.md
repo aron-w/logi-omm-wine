@@ -2,13 +2,13 @@
 
 ## Prefix Needs Initialization
 
-`omme` does not initialize or repair the Wine prefix automatically. Run:
+`logi-omm-wine` does not initialize or repair the Wine prefix automatically. Run:
 
 ```sh
 just init
 ```
 
-If the prefix was created by an older OMME release or the window flickers, run:
+If the prefix was created by an older logi-omm-wine release or the window flickers, run:
 
 ```sh
 just repair
@@ -34,8 +34,8 @@ Install the udev rule, reload rules, and reconnect the mouse:
 just reload-udev
 ```
 
-For NixOS, enable `programs.omme.enable = true` and keep
-`programs.omme.installUdevRules = true`.
+For NixOS, enable `programs.logi-omm-wine.enable = true` and keep
+`programs.logi-omm-wine.installUdevRules = true`.
 
 ## udev Scope
 

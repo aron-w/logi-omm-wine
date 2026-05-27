@@ -14,7 +14,7 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v16
       - name: Check shell runtime contract
         run: |
-          bash -n bin/omme bin/omme-init bin/omme-init-gui bin/omme-debug tests/runtime-contract.sh
+          bash -n bin/logi-omm-wine bin/logi-omm-wine-init bin/logi-omm-wine-init-gui bin/logi-omm-wine-debug tests/runtime-contract.sh
           tests/runtime-contract.sh
       - name: Check distro install dry-run
         run: make -n install DESTDIR=/tmp/omme-pkg PREFIX=/usr UDEVDIR=/usr/lib/udev/rules.d

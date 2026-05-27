@@ -4,22 +4,22 @@ DATADIR ?= $(PREFIX)/share
 UDEVDIR ?= /usr/lib/udev/rules.d
 APPLICATIONSDIR ?= $(DATADIR)/applications
 METAINFO_DIR ?= $(DATADIR)/metainfo
-OMME_DATADIR ?= $(DATADIR)/omme
-OMME_EXE ?=
+LOGI_OMM_WINE_DATADIR ?= $(DATADIR)/logi-omm-wine
+LOGI_OMM_WINE_EXE ?=
 
 .PHONY: install install-exe
 
 install:
-	install -Dm755 bin/omme "$(DESTDIR)$(BINDIR)/omme"
-	install -Dm755 bin/omme-init "$(DESTDIR)$(BINDIR)/omme-init"
-	install -Dm755 bin/omme-init-gui "$(DESTDIR)$(BINDIR)/omme-init-gui"
-	install -Dm755 bin/omme-debug "$(DESTDIR)$(BINDIR)/omme-debug"
-	install -Dm644 udev/70-logitech-omm.rules "$(DESTDIR)$(UDEVDIR)/70-logitech-omm.rules"
-	install -Dm644 share/applications/omme.desktop "$(DESTDIR)$(APPLICATIONSDIR)/omme.desktop"
-	install -Dm644 share/applications/omme-init.desktop "$(DESTDIR)$(APPLICATIONSDIR)/omme-init.desktop"
-	install -Dm644 share/metainfo/io.github.aron-w.omme.metainfo.xml "$(DESTDIR)$(METAINFO_DIR)/io.github.aron-w.omme.metainfo.xml"
-	install -d "$(DESTDIR)$(OMME_DATADIR)"
+	install -Dm755 bin/logi-omm-wine "$(DESTDIR)$(BINDIR)/logi-omm-wine"
+	install -Dm755 bin/logi-omm-wine-init "$(DESTDIR)$(BINDIR)/logi-omm-wine-init"
+	install -Dm755 bin/logi-omm-wine-init-gui "$(DESTDIR)$(BINDIR)/logi-omm-wine-init-gui"
+	install -Dm755 bin/logi-omm-wine-debug "$(DESTDIR)$(BINDIR)/logi-omm-wine-debug"
+	install -Dm644 udev/70-logi-omm-wine.rules "$(DESTDIR)$(UDEVDIR)/70-logi-omm-wine.rules"
+	install -Dm644 share/applications/logi-omm-wine.desktop "$(DESTDIR)$(APPLICATIONSDIR)/logi-omm-wine.desktop"
+	install -Dm644 share/applications/logi-omm-wine-init.desktop "$(DESTDIR)$(APPLICATIONSDIR)/logi-omm-wine-init.desktop"
+	install -Dm644 share/metainfo/io.github.aron-w.logi-omm-wine.metainfo.xml "$(DESTDIR)$(METAINFO_DIR)/io.github.aron-w.logi-omm-wine.metainfo.xml"
+	install -d "$(DESTDIR)$(LOGI_OMM_WINE_DATADIR)"
 
 install-exe:
-	@test -n "$(OMME_EXE)" || { printf '%s\n' 'Set OMME_EXE=/path/to/OnboardMemoryManager.exe'; exit 2; }
-	install -Dm644 "$(OMME_EXE)" "$(DESTDIR)$(OMME_DATADIR)/OnboardMemoryManager.exe"
+	@test -n "$(LOGI_OMM_WINE_EXE)" || { printf '%s\n' 'Set LOGI_OMM_WINE_EXE=/path/to/OnboardMemoryManager.exe'; exit 2; }
+	install -Dm644 "$(LOGI_OMM_WINE_EXE)" "$(DESTDIR)$(LOGI_OMM_WINE_DATADIR)/OnboardMemoryManager.exe"

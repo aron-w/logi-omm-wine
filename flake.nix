@@ -43,15 +43,15 @@
           };
 
           udevRules = pkgs.writeTextFile {
-            name = "omme-udev-rules";
-            destination = "/lib/udev/rules.d/70-logitech-omm.rules";
-            text = builtins.readFile ./udev/70-logitech-omm.rules;
+            name = "logi-omm-wine-udev-rules";
+            destination = "/lib/udev/rules.d/70-logi-omm-wine.rules";
+            text = builtins.readFile ./udev/70-logi-omm-wine.rules;
           };
 
         in
         {
           default = pkgs.stdenvNoCC.mkDerivation {
-            pname = "omme";
+            pname = "logi-omm-wine";
             version = ommVersion;
 
             dontUnpack = true;
@@ -63,18 +63,18 @@
             installPhase = ''
               runHook preInstall
 
-              install -Dm755 ${./bin/omme} "$out/bin/omme"
-              install -Dm755 ${./bin/omme-init} "$out/bin/omme-init"
-              install -Dm755 ${./bin/omme-init-gui} "$out/bin/omme-init-gui"
-              install -Dm755 ${./bin/omme-debug} "$out/bin/omme-debug"
+              install -Dm755 ${./bin/logi-omm-wine} "$out/bin/logi-omm-wine"
+              install -Dm755 ${./bin/logi-omm-wine-init} "$out/bin/logi-omm-wine-init"
+              install -Dm755 ${./bin/logi-omm-wine-init-gui} "$out/bin/logi-omm-wine-init-gui"
+              install -Dm755 ${./bin/logi-omm-wine-debug} "$out/bin/logi-omm-wine-debug"
 
-              mkdir -p "$out/share/omme"
-              cp ${ommExe} "$out/share/omme/OnboardMemoryManager.exe"
-              install -Dm644 ${./share/applications/omme.desktop} "$out/share/applications/omme.desktop"
-              install -Dm644 ${./share/applications/omme-init.desktop} "$out/share/applications/omme-init.desktop"
-              install -Dm644 ${./share/metainfo/io.github.aron-w.omme.metainfo.xml} "$out/share/metainfo/io.github.aron-w.omme.metainfo.xml"
+              mkdir -p "$out/share/logi-omm-wine"
+              cp ${ommExe} "$out/share/logi-omm-wine/OnboardMemoryManager.exe"
+              install -Dm644 ${./share/applications/logi-omm-wine.desktop} "$out/share/applications/logi-omm-wine.desktop"
+              install -Dm644 ${./share/applications/logi-omm-wine-init.desktop} "$out/share/applications/logi-omm-wine-init.desktop"
+              install -Dm644 ${./share/metainfo/io.github.aron-w.logi-omm-wine.metainfo.xml} "$out/share/metainfo/io.github.aron-w.logi-omm-wine.metainfo.xml"
 
-              wrapProgram "$out/bin/omme" \
+              wrapProgram "$out/bin/logi-omm-wine" \
                 --prefix PATH : ${
                   lib.makeBinPath [
                     pkgs.bash
@@ -82,7 +82,7 @@
                     wine
                   ]
                 }
-              wrapProgram "$out/bin/omme-init" \
+              wrapProgram "$out/bin/logi-omm-wine-init" \
                 --prefix PATH : ${
                   lib.makeBinPath [
                     pkgs.bash
@@ -92,14 +92,14 @@
                     wine
                   ]
                 }
-              wrapProgram "$out/bin/omme-init-gui" \
+              wrapProgram "$out/bin/logi-omm-wine-init-gui" \
                 --prefix PATH : ${
                   lib.makeBinPath [
                     pkgs.bash
                     pkgs.xterm
                   ]
                 }
-              wrapProgram "$out/bin/omme-debug" \
+              wrapProgram "$out/bin/logi-omm-wine-debug" \
                 --prefix PATH : ${
                   lib.makeBinPath [
                     pkgs.bash
@@ -115,12 +115,12 @@
               description = "Wine wrapper for Logitech Onboard Memory Manager";
               homepage = "https://support.logi.com/hc/en-us/articles/360059641133-Onboard-Memory-Manager";
               license = lib.licenses.unfree;
-              mainProgram = "omme";
+              mainProgram = "logi-omm-wine";
               platforms = lib.platforms.linux;
             };
           };
 
-          omme-udev-rules = udevRules;
+          logi-omm-wine-udev-rules = udevRules;
         }
       );
 
@@ -130,12 +130,12 @@
           pkgs = mkPkgs system;
         in
         {
-          runtime-contract = pkgs.runCommand "omme-runtime-contract" { } ''
-            ${pkgs.bash}/bin/bash -n ${./bin/omme}
-            ${pkgs.bash}/bin/bash -n ${./bin/omme-init}
-            ${pkgs.bash}/bin/bash -n ${./bin/omme-init-gui}
-            ${pkgs.bash}/bin/bash -n ${./bin/omme-debug}
-            OMME_TEST_BIN_DIR=${./bin} ${pkgs.bash}/bin/bash ${./tests/runtime-contract.sh}
+          runtime-contract = pkgs.runCommand "logi-omm-wine-runtime-contract" { } ''
+            ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine}
+            ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-init}
+            ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-init-gui}
+            ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-debug}
+            LOGI_OMM_WINE_TEST_BIN_DIR=${./bin} ${pkgs.bash}/bin/bash ${./tests/runtime-contract.sh}
             touch $out
           '';
         }
@@ -144,18 +144,18 @@
       apps = forAllSystems (system: {
         default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/omme";
+          program = "${self.packages.${system}.default}/bin/logi-omm-wine";
           meta.description = "Run Logitech Onboard Memory Manager through Wine";
         };
         init = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/omme-init";
-          meta.description = "Initialize the OMME Wine prefix";
+          program = "${self.packages.${system}.default}/bin/logi-omm-wine-init";
+          meta.description = "Initialize the logi-omm-wine Wine prefix";
         };
         debug = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/omme-debug";
-          meta.description = "Run OMME with Wine HID debug logging";
+          program = "${self.packages.${system}.default}/bin/logi-omm-wine-debug";
+          meta.description = "Run logi-omm-wine with Wine HID debug logging";
         };
       });
 
@@ -175,7 +175,7 @@
               pkgs.wineWow64Packages.stable
             ];
 
-            OMME_VERSION = ommVersion;
+            LOGI_OMM_WINE_VERSION = ommVersion;
           };
         }
       );
@@ -188,19 +188,19 @@
           ...
         }:
         let
-          cfg = config.programs.omme;
+          cfg = config.programs.logi-omm-wine;
           package = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
-          udevRules = self.packages.${pkgs.stdenv.hostPlatform.system}.omme-udev-rules;
+          udevRules = self.packages.${pkgs.stdenv.hostPlatform.system}.logi-omm-wine-udev-rules;
         in
         {
-          options.programs.omme = {
+          options.programs.logi-omm-wine = {
             enable = lib.mkEnableOption "Logitech Onboard Memory Manager Wine wrapper";
 
             package = lib.mkOption {
               type = lib.types.package;
               default = package;
-              defaultText = lib.literalExpression "inputs.omme.packages.${pkgs.system}.default";
-              description = "The OMME package to install.";
+              defaultText = lib.literalExpression "inputs.logiOmmWine.packages.${pkgs.system}.default";
+              description = "The logi-omm-wine package to install.";
             };
 
             installUdevRules = lib.mkOption {

@@ -3,6 +3,6 @@ Type=Application
 Name=Logitech Onboard Memory Manager
 GenericName=Mouse onboard memory utility
 Comment=Run Logitech Onboard Memory Manager through Wine
-Exec=omme
+Exec=logi-omm-wine
 Terminal=false
 Categories=Settings;HardwareSettings;
