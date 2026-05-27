@@ -119,7 +119,7 @@ export WINEDEBUG="${OMME_WINEDEBUG:--all}"
 export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
 wineboot -i
-winetricks -q remove_mono dotnet48 vcrun2022 win10
+winetricks -q remove_mono dotnet48 vcrun2022 win10 renderer=gdi
 
 wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
   /v 'Enable SDL' /t REG_DWORD /d 0 /f

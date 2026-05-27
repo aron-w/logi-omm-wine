@@ -107,7 +107,7 @@ export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$OMME_EXE"
 bash "$script_dir/omme-init" --force >/dev/null
 assert_log "wineboot <-i>
-winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10>
+winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
 
@@ -122,7 +122,7 @@ export OMME_ALLOW_DOWNLOAD=1
 bash "$script_dir/omme-init" >/dev/null
 assert_log "curl
 wineboot <-i>
-winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10>
+winetricks <-q> <remove_mono> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
 
