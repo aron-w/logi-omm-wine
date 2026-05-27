@@ -42,81 +42,10 @@
             hash = ommHash;
           };
 
-          ommeInit = pkgs.writeShellApplication {
-            name = "omme-init";
-            runtimeInputs = [
-              pkgs.coreutils
-              pkgs.gnugrep
-              pkgs.winetricks
-              wine
-            ];
-            text = ''
-              set -euo pipefail
-
-              export WINEPREFIX="''${OMME_WINEPREFIX:-''${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
-              export WINEARCH=win64
-              export WINEDEBUG="''${OMME_WINEDEBUG:--all}"
-              export WINETRICKS_LATEST_VERSION_CHECK=disabled
-
-              marker="$WINEPREFIX/.omme-initialized-dotnet48"
-
-              mkdir -p "$WINEPREFIX"
-              wineboot -i
-
-              if [ ! -e "$marker" ]; then
-                winetricks -q remove_mono dotnet48 vcrun2022 win10
-
-                wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
-                  /v 'Enable SDL' /t REG_DWORD /d 0 /f
-                wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
-                  /v DisableHidraw /t REG_DWORD /d 0 /f
-
-                touch "$marker"
-              fi
-            '';
-          };
-
-          ommeRun = pkgs.writeShellApplication {
-            name = "omme";
-            runtimeInputs = [
-              pkgs.coreutils
-              wine
-            ];
-            text = ''
-              set -euo pipefail
-
-              export WINEPREFIX="''${OMME_WINEPREFIX:-''${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
-              export WINEARCH=win64
-              export WINEDEBUG="''${OMME_WINEDEBUG:--all}"
-
-              if [ ! -e "$WINEPREFIX/.omme-initialized-dotnet48" ]; then
-                ${ommeInit}/bin/omme-init
-              fi
-
-              exec wine "${ommExe}" "$@"
-            '';
-          };
-
-          ommeDebug = pkgs.writeShellApplication {
-            name = "omme-debug";
-            runtimeInputs = [
-              ommeRun
-            ];
-            text = ''
-              set -euo pipefail
-
-              export OMME_WINEDEBUG="''${OMME_WINEDEBUG:-+plugplay,+hid,+hid_report,+setupapi,+winebus}"
-              exec omme "$@"
-            '';
-          };
-
           udevRules = pkgs.writeTextFile {
             name = "omme-udev-rules";
             destination = "/lib/udev/rules.d/70-logitech-omm.rules";
-            text = ''
-              # Allow the active local session to access Logitech HID raw devices for Wine/OMM.
-              KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", MODE="0660", TAG+="uaccess"
-            '';
+            text = builtins.readFile ./udev/70-logitech-omm.rules;
           };
 
           desktopItem = pkgs.makeDesktopItem {
@@ -149,11 +78,40 @@
             installPhase = ''
               runHook preInstall
 
-              mkdir -p "$out/bin" "$out/share/omme"
+              install -Dm755 ${./bin/omme} "$out/bin/omme"
+              install -Dm755 ${./bin/omme-init} "$out/bin/omme-init"
+              install -Dm755 ${./bin/omme-debug} "$out/bin/omme-debug"
+
+              mkdir -p "$out/share/omme"
               cp ${ommExe} "$out/share/omme/OnboardMemoryManager.exe"
-              ln -s ${ommeRun}/bin/omme "$out/bin/omme"
-              ln -s ${ommeInit}/bin/omme-init "$out/bin/omme-init"
-              ln -s ${ommeDebug}/bin/omme-debug "$out/bin/omme-debug"
+
+              wrapProgram "$out/bin/omme" \
+                --prefix PATH : ${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.coreutils
+                    wine
+                  ]
+                }
+              wrapProgram "$out/bin/omme-init" \
+                --prefix PATH : ${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.coreutils
+                    pkgs.curl
+                    pkgs.gawk
+                    pkgs.winetricks
+                    wine
+                  ]
+                }
+              wrapProgram "$out/bin/omme-debug" \
+                --prefix PATH : ${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.coreutils
+                    wine
+                  ]
+                }
 
               runHook postInstall
             '';
@@ -168,6 +126,22 @@
           };
 
           omme-udev-rules = udevRules;
+        }
+      );
+
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = mkPkgs system;
+        in
+        {
+          runtime-contract = pkgs.runCommand "omme-runtime-contract" { } ''
+            ${pkgs.bash}/bin/bash -n ${./bin/omme}
+            ${pkgs.bash}/bin/bash -n ${./bin/omme-init}
+            ${pkgs.bash}/bin/bash -n ${./bin/omme-debug}
+            OMME_TEST_BIN_DIR=${./bin} ${pkgs.bash}/bin/bash ${./tests/runtime-contract.sh}
+            touch $out
+          '';
         }
       );
 

@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+omme_version="2.6.1749"
+exe_hash="aec76587f1d07c51667c140c730a38f82675fbe2d898e79413372146b9632358"
+exe_name="OnboardMemoryManager.exe"
+download_name="OnboardMemoryManager_${omme_version}.exe"
+download_url="https://download01.logi.com/web/ftp/pub/techsupport/gaming/$download_name"
+
+force=0
+case "${1:-}" in
+  --force)
+    force=1
+    shift
+    ;;
+  "")
+    ;;
+  *)
+    printf 'Usage: omme-init [--force]\n' >&2
+    exit 2
+    ;;
+esac
+
+if [ "$#" -ne 0 ]; then
+  printf 'Usage: omme-init [--force]\n' >&2
+  exit 2
+fi
+
+wineprefix="${OMME_WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
+marker="$wineprefix/.omme-initialized-dotnet48"
+
+script_dir="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
+  pwd -P
+)"
+
+find_exe() {
+  if [ "${OMME_EXE:-}" != "" ]; then
+    printf '%s\n' "$OMME_EXE"
+    return 0
+  fi
+
+  if [ "${OMME_DATA_DIR:-}" != "" ] && [ -f "$OMME_DATA_DIR/$exe_name" ]; then
+    printf '%s\n' "$OMME_DATA_DIR/$exe_name"
+    return 0
+  fi
+
+  if [ -f "$script_dir/../share/omme/$exe_name" ]; then
+    printf '%s\n' "$script_dir/../share/omme/$exe_name"
+    return 0
+  fi
+
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/omme"
+  if [ -f "$cache_dir/$download_name" ]; then
+    printf '%s\n' "$cache_dir/$download_name"
+    return 0
+  fi
+
+  return 1
+}
+
+verify_exe() {
+  actual_hash="$(sha256sum "$1" | awk '{ print $1 }')"
+  if [ "$actual_hash" != "$exe_hash" ]; then
+    printf 'Hash mismatch for %s\nexpected: %s\nactual:   %s\n' "$1" "$exe_hash" "$actual_hash" >&2
+    exit 1
+  fi
+}
+
+download_exe() {
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/omme"
+  cache_path="$cache_dir/$download_name"
+  mkdir -p "$cache_dir"
+
+  if [ -f "$cache_path" ]; then
+    verify_exe "$cache_path"
+    printf '%s\n' "$cache_path"
+    return 0
+  fi
+
+  if [ "${OMME_ALLOW_DOWNLOAD:-}" != "1" ]; then
+    cat >&2 <<EOF
+Logitech Onboard Memory Manager executable was not found.
+Set OMME_EXE, set OMME_DATA_DIR, install $exe_name under share/omme, or allow a verified runtime download:
+  OMME_ALLOW_DOWNLOAD=1 omme-init
+EOF
+    exit 1
+  fi
+
+  if ! command -v curl >/dev/null 2>&1; then
+    printf 'curl is required when OMME_ALLOW_DOWNLOAD=1 and no local executable exists.\n' >&2
+    exit 1
+  fi
+
+  tmp_path="$cache_path.tmp.$$"
+  trap 'rm -f "$tmp_path"' EXIT
+  curl -fL --retry 3 -o "$tmp_path" "$download_url"
+  verify_exe "$tmp_path"
+  mv "$tmp_path" "$cache_path"
+  trap - EXIT
+  printf '%s\n' "$cache_path"
+}
+
+if [ -e "$marker" ] && [ "$force" -eq 0 ]; then
+  exit 0
+fi
+
+if exe_path="$(find_exe)"; then
+  verify_exe "$exe_path"
+else
+  exe_path="$(download_exe)"
+fi
+
+mkdir -p "$wineprefix"
+
+export WINEPREFIX="$wineprefix"
+export WINEARCH=win64
+export WINEDEBUG="${OMME_WINEDEBUG:--all}"
+export WINETRICKS_LATEST_VERSION_CHECK=disabled
+
+wineboot -i
+winetricks -q remove_mono dotnet48 vcrun2022 win10
+
+wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
+  /v 'Enable SDL' /t REG_DWORD /d 0 /f
+wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
+  /v DisableHidraw /t REG_DWORD /d 0 /f
+
+touch "$marker"
+
+printf 'Initialized OMME Wine prefix using %s\n' "$exe_path"

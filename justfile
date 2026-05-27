@@ -1,21 +1,29 @@
 set dotenv-load := true
 
-# Show the available repo commands and their descriptions.
+# List available commands.
 default:
     @just --list --unsorted
 
-# Show the recommended workflow for this repo.
+# Show what to run at each stage.
 workflow:
     @printf '%s\n' \
-      'First time:' \
+      'One-time setup:' \
       '  direnv allow' \
+      '  just doctor' \
+      '  just init' \
+      '' \
+      'Normal use:' \
       '  just run' \
       '' \
-      'Troubleshooting:' \
-      '  just init   # initialize or repair the Wine prefix without launching OMM' \
-      '  just debug  # launch with Wine HID debug logs' \
+      'If the prefix is broken:' \
+      '  just repair' \
       '' \
-      'Normal development:' \
+      'If the mouse is not visible:' \
+      '  just reload-udev' \
+      '  just debug' \
+      '' \
+      'Before publishing changes:' \
+      '  just test' \
       '  just check' \
       '  just build' \
       '' \
@@ -23,20 +31,45 @@ workflow:
       '  enable omme.nixosModules.default with programs.omme.enable = true' \
       '  rebuild NixOS, then reconnect the Logitech mouse'
 
-# Verify that the common local tools are available.
+# Verify the local tools used by this repository.
 doctor:
     @command -v nix >/dev/null
     @command -v direnv >/dev/null
     @command -v just >/dev/null
     @printf '%s\n' 'Required local tools are available.'
 
+# Initialize the Wine prefix once. Exits quickly when it is already initialized.
+init:
+    nix run .#init
+
+# Force Wine prefix initialization again without launching OMM.
+repair:
+    nix run .#init -- --force
+
+# Start Logitech Onboard Memory Manager. Requires `just init` first.
+run:
+    nix run .#
+
+# Start OMM with Wine HID, plug-and-play, setupapi, and winebus debug logs.
+debug:
+    nix run .#debug
+
+# Enter the development shell with Wine, winetricks, just, and udev tools.
+develop:
+    nix develop
+
+# Run local shell syntax and fake-PATH runtime contract tests.
+test:
+    bash -n bin/omme bin/omme-init bin/omme-debug tests/runtime-contract.sh
+    tests/runtime-contract.sh
+
+# Evaluate flake outputs, package checks, and the NixOS module.
+check:
+    nix flake check
+
 # Build the default OMME package.
 build:
     nix build .#
-
-# Evaluate flake outputs and the NixOS module.
-check:
-    nix flake check
 
 # Format Nix files in this repo.
 fmt:
@@ -45,22 +78,6 @@ fmt:
 # Check Nix formatting without changing files.
 fmt-check:
     nixfmt --check flake.nix
-
-# Enter the development shell with Wine, winetricks, just, and udev tools.
-develop:
-    nix develop
-
-# Initialize or repair the dedicated Wine prefix without launching OMM.
-init:
-    nix run .#init
-
-# Run Logitech Onboard Memory Manager through Wine.
-run:
-    nix run .#
-
-# Run OMM with Wine HID, plug-and-play, setupapi, and winebus debug logs.
-debug:
-    nix run .#debug
 
 # Reload local udev rules and retrigger hidraw devices; requires sudo.
 reload-udev:

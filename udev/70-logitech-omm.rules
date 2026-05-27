@@ -1,0 +1,2 @@
+# Allow the active local session to access Logitech HID raw devices for Wine/OMM.
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", MODE="0660", TAG+="uaccess"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export OMME_WINEDEBUG="${OMME_WINEDEBUG:-+plugplay,+hid,+hid_report,+setupapi,+winebus}"
+
+script_dir="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
+  pwd -P
+)"
+
+if [ -x "$script_dir/omme" ]; then
+  exec "$script_dir/omme" "$@"
+fi
+
+exec omme "$@"

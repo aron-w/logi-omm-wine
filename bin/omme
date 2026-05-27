@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+omme_version="2.6.1749"
+exe_name="OnboardMemoryManager.exe"
+download_name="OnboardMemoryManager_${omme_version}.exe"
+
+wineprefix="${OMME_WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
+marker="$wineprefix/.omme-initialized-dotnet48"
+
+script_dir="$(
+  cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
+  pwd -P
+)"
+
+find_exe() {
+  if [ "${OMME_EXE:-}" != "" ]; then
+    printf '%s\n' "$OMME_EXE"
+    return 0
+  fi
+
+  if [ "${OMME_DATA_DIR:-}" != "" ] && [ -f "$OMME_DATA_DIR/$exe_name" ]; then
+    printf '%s\n' "$OMME_DATA_DIR/$exe_name"
+    return 0
+  fi
+
+  if [ -f "$script_dir/../share/omme/$exe_name" ]; then
+    printf '%s\n' "$script_dir/../share/omme/$exe_name"
+    return 0
+  fi
+
+  cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/omme"
+  if [ -f "$cache_dir/$download_name" ]; then
+    printf '%s\n' "$cache_dir/$download_name"
+    return 0
+  fi
+
+  return 1
+}
+
+if [ ! -e "$marker" ]; then
+  cat >&2 <<EOF
+OMME Wine prefix is not initialized.
+Run omme-init first, or run omme-init --force to repair an existing prefix.
+Prefix: $wineprefix
+EOF
+  exit 1
+fi
+
+if ! exe_path="$(find_exe)"; then
+  cat >&2 <<EOF
+Logitech Onboard Memory Manager executable was not found.
+Set OMME_EXE, set OMME_DATA_DIR, install $exe_name under share/omme, or run:
+  OMME_ALLOW_DOWNLOAD=1 omme-init
+EOF
+  exit 1
+fi
+
+export WINEPREFIX="$wineprefix"
+export WINEARCH=win64
+export WINEDEBUG="${OMME_WINEDEBUG:--all}"
+
+exec wine "$exe_path" "$@"
