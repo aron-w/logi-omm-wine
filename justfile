@@ -60,7 +60,7 @@ develop:
 
 # Run local shell syntax and fake-PATH runtime contract tests.
 test:
-    bash -n bin/omme bin/omme-init bin/omme-debug tests/runtime-contract.sh
+    bash -n bin/omme bin/omme-init bin/omme-init-gui bin/omme-debug tests/runtime-contract.sh
     tests/runtime-contract.sh
 
 # Evaluate flake outputs, package checks, and the NixOS module.

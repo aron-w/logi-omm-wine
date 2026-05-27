@@ -91,18 +91,28 @@ mkdir -p "$OMME_WINEPREFIX"
 touch "$OMME_WINEPREFIX/.omme-initialized-dotnet48"
 export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$OMME_EXE"
+if bash "$script_dir/omme" --example >/dev/null 2>"$tmp_root/stderr"; then
+  fail "omme with legacy marker should fail"
+fi
+assert_log ""
+
+reset_fake_path
+mkdir -p "$OMME_WINEPREFIX"
+touch "$OMME_WINEPREFIX/.omme-initialized-v2"
+export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$OMME_EXE"
 bash "$script_dir/omme" --example
 assert_log "wine <$OMME_EXE> <--example>"
 
 reset_fake_path
 mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-dotnet48"
+touch "$OMME_WINEPREFIX/.omme-initialized-v2"
 bash "$script_dir/omme-init"
 assert_log ""
 
 reset_fake_path
 mkdir -p "$OMME_WINEPREFIX"
-touch "$OMME_WINEPREFIX/.omme-initialized-dotnet48"
+touch "$OMME_WINEPREFIX/.omme-initialized-v2"
 export OMME_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$OMME_EXE"
 bash "$script_dir/omme-init" --force >/dev/null

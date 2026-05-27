@@ -48,18 +48,6 @@
             text = builtins.readFile ./udev/70-logitech-omm.rules;
           };
 
-          desktopItem = pkgs.makeDesktopItem {
-            name = "omme";
-            desktopName = "Logitech Onboard Memory Manager";
-            genericName = "Mouse onboard memory utility";
-            comment = "Run Logitech Onboard Memory Manager through Wine";
-            exec = "omme";
-            terminal = false;
-            categories = [
-              "Settings"
-              "HardwareSettings"
-            ];
-          };
         in
         {
           default = pkgs.stdenvNoCC.mkDerivation {
@@ -69,21 +57,22 @@
             dontUnpack = true;
 
             nativeBuildInputs = [
-              pkgs.copyDesktopItems
               pkgs.makeWrapper
             ];
-
-            desktopItems = [ desktopItem ];
 
             installPhase = ''
               runHook preInstall
 
               install -Dm755 ${./bin/omme} "$out/bin/omme"
               install -Dm755 ${./bin/omme-init} "$out/bin/omme-init"
+              install -Dm755 ${./bin/omme-init-gui} "$out/bin/omme-init-gui"
               install -Dm755 ${./bin/omme-debug} "$out/bin/omme-debug"
 
               mkdir -p "$out/share/omme"
               cp ${ommExe} "$out/share/omme/OnboardMemoryManager.exe"
+              install -Dm644 ${./share/applications/omme.desktop} "$out/share/applications/omme.desktop"
+              install -Dm644 ${./share/applications/omme-init.desktop} "$out/share/applications/omme-init.desktop"
+              install -Dm644 ${./share/metainfo/io.github.aron-w.omme.metainfo.xml} "$out/share/metainfo/io.github.aron-w.omme.metainfo.xml"
 
               wrapProgram "$out/bin/omme" \
                 --prefix PATH : ${
@@ -99,9 +88,15 @@
                     pkgs.bash
                     pkgs.coreutils
                     pkgs.curl
-                    pkgs.gawk
                     pkgs.winetricks
                     wine
+                  ]
+                }
+              wrapProgram "$out/bin/omme-init-gui" \
+                --prefix PATH : ${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.xterm
                   ]
                 }
               wrapProgram "$out/bin/omme-debug" \
@@ -138,6 +133,7 @@
           runtime-contract = pkgs.runCommand "omme-runtime-contract" { } ''
             ${pkgs.bash}/bin/bash -n ${./bin/omme}
             ${pkgs.bash}/bin/bash -n ${./bin/omme-init}
+            ${pkgs.bash}/bin/bash -n ${./bin/omme-init-gui}
             ${pkgs.bash}/bin/bash -n ${./bin/omme-debug}
             OMME_TEST_BIN_DIR=${./bin} ${pkgs.bash}/bin/bash ${./tests/runtime-contract.sh}
             touch $out

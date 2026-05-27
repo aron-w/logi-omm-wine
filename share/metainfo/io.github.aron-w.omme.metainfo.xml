@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.aron-w.omme</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>OMME</name>
+  <summary>Wine wrapper for Logitech Onboard Memory Manager</summary>
+  <description>
+    <p>
+      OMME packages portable launch scripts and Linux integration files for
+      running Logitech Onboard Memory Manager under Wine.
+    </p>
+    <p>
+      Logitech Onboard Memory Manager is proprietary vendor software. This
+      project does not include the Logitech executable.
+    </p>
+  </description>
+  <launchable type="desktop-id">omme.desktop</launchable>
+  <url type="homepage">https://github.com/aron-w/omme</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="2.6.1749" date="2026-05-27" />
+  </releases>
+</component>

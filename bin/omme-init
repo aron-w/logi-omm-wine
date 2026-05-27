@@ -2,6 +2,7 @@
 set -euo pipefail
 
 omme_version="2.6.1749"
+init_contract_version="v2"
 exe_hash="aec76587f1d07c51667c140c730a38f82675fbe2d898e79413372146b9632358"
 exe_name="OnboardMemoryManager.exe"
 download_name="OnboardMemoryManager_${omme_version}.exe"
@@ -27,7 +28,7 @@ if [ "$#" -ne 0 ]; then
 fi
 
 wineprefix="${OMME_WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
-marker="$wineprefix/.omme-initialized-dotnet48"
+marker="$wineprefix/.omme-initialized-$init_contract_version"
 
 script_dir="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1
@@ -60,7 +61,8 @@ find_exe() {
 }
 
 verify_exe() {
-  actual_hash="$(sha256sum "$1" | awk '{ print $1 }')"
+  actual_hash_line="$(sha256sum "$1")"
+  actual_hash="${actual_hash_line%% *}"
   if [ "$actual_hash" != "$exe_hash" ]; then
     printf 'Hash mismatch for %s\nexpected: %s\nactual:   %s\n' "$1" "$exe_hash" "$actual_hash" >&2
     exit 1

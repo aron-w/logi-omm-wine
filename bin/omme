@@ -2,11 +2,12 @@
 set -euo pipefail
 
 omme_version="2.6.1749"
+init_contract_version="v2"
 exe_name="OnboardMemoryManager.exe"
 download_name="OnboardMemoryManager_${omme_version}.exe"
 
 wineprefix="${OMME_WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/omme/prefix}"
-marker="$wineprefix/.omme-initialized-dotnet48"
+marker="$wineprefix/.omme-initialized-$init_contract_version"
 
 script_dir="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1

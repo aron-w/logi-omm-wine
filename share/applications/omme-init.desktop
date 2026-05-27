@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Initialize Logitech Onboard Memory Manager
+GenericName=Wine prefix initializer
+Comment=Initialize or repair the Wine prefix for Logitech Onboard Memory Manager
+Exec=omme-init-gui
+Terminal=false
+Categories=Settings;HardwareSettings;
