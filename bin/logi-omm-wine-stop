@@ -8,11 +8,14 @@ export WINEARCH=win64
 export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
 
 wineserver -k || true
+wineserver -w || true
 
 for environ in /proc/[0-9]*/environ; do
   [ -r "$environ" ] || continue
   pid="${environ%/environ}"
   pid="${pid##*/}"
+  [ "$pid" != "$$" ] || continue
+  [ "$pid" != "$BASHPID" ] || continue
   if { tr '\0' '\n' <"$environ"; } 2>/dev/null | grep -Fxq "WINEPREFIX=$wineprefix"; then
     kill "$pid" 2>/dev/null || true
   fi

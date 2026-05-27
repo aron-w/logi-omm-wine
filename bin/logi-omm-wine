@@ -2,7 +2,7 @@
 set -euo pipefail
 
 omme_version="2.6.1749"
-init_contract_version="v3"
+init_contract_version="v4"
 exe_name="OnboardMemoryManager.exe"
 download_name="OnboardMemoryManager_${omme_version}.exe"
 
@@ -60,5 +60,24 @@ fi
 export WINEPREFIX="$wineprefix"
 export WINEARCH=win64
 export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
+
+if [ "${LOGI_OMM_WINE_CLEAN_START:-1}" = "1" ]; then
+  wineserver -k || true
+  wineserver -w || true
+  for environ in /proc/[0-9]*/environ; do
+    [ -r "$environ" ] || continue
+    pid="${environ%/environ}"
+    pid="${pid##*/}"
+    [ "$pid" != "$$" ] || continue
+    [ "$pid" != "$BASHPID" ] || continue
+    if { tr '\0' '\n' <"$environ"; } 2>/dev/null | grep -Fxq "WINEPREFIX=$wineprefix"; then
+      kill "$pid" 2>/dev/null || true
+    fi
+  done
+fi
+
+if [ "${LOGI_OMM_WINE_FORCE_X11:-}" != "1" ] && [ "${WAYLAND_DISPLAY:-}" != "" ]; then
+  unset DISPLAY
+fi
 
 exec wine "$exe_path" "$@"

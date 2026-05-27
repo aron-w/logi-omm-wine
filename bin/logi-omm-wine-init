@@ -2,7 +2,7 @@
 set -euo pipefail
 
 omme_version="2.6.1749"
-init_contract_version="v3"
+init_contract_version="v4"
 exe_hash="aec76587f1d07c51667c140c730a38f82675fbe2d898e79413372146b9632358"
 exe_name="OnboardMemoryManager.exe"
 download_name="OnboardMemoryManager_${omme_version}.exe"
@@ -120,13 +120,29 @@ export WINEARCH=win64
 export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
 export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
-wineboot -i
-winetricks -q remove_mono corefonts dotnet48 vcrun2022 win10 renderer=gdi
+apply_runtime_settings() {
+  wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
+    /v 'Enable SDL' /t REG_DWORD /d 0 /f
+  wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
+    /v DisableHidraw /t REG_DWORD /d 0 /f
+  wine reg add 'HKCU\Software\Wine\Direct3D' \
+    /v renderer /t REG_SZ /d gdi /f
+  wine reg add 'HKCU\Software\Wine\X11 Driver' \
+    /v KeyboardScancodeDetect /t REG_SZ /d N /f
+  wine reg add 'HKCU\Software\Wine\Drivers' \
+    /v Graphics /t REG_SZ /d wayland,x11 /f
+}
 
-wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
-  /v 'Enable SDL' /t REG_DWORD /d 0 /f
-wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
-  /v DisableHidraw /t REG_DWORD /d 0 /f
+if [ -e "$marker" ] && [ "$force" -eq 1 ] && [ "${LOGI_OMM_WINE_REINSTALL:-}" != "1" ]; then
+  apply_runtime_settings
+  touch "$marker"
+  printf 'Repaired logi-omm-wine Wine prefix runtime settings using %s\n' "$exe_path"
+  exit 0
+fi
+
+wineboot -i
+winetricks -q remove_mono corefonts dotnet48 vcrun2022 win10
+apply_runtime_settings
 
 touch "$marker"
 

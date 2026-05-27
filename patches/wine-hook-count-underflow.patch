@@ -1,0 +1,40 @@
+diff --git a/server/hook.c b/server/hook.c
+index 11111111111..22222222222 100644
+--- a/server/hook.c
++++ b/server/hook.c
+@@ -310,6 +310,8 @@ static void remove_hook( struct hook *hook )
+     int global = hook->table == desktop->global_hooks;
+     struct thread *thread;
+ 
++    if (!hook->proc) return;
++
+     if (!global)
+         add_queue_hook_count( hook->thread, hook->index, -1 );
+     else LIST_FOR_EACH_ENTRY( thread, &desktop->threads, struct thread, desktop_entry )
+diff --git a/server/queue.c b/server/queue.c
+index 11111111111..22222222222 100644
+--- a/server/queue.c
++++ b/server/queue.c
+@@ -708,14 +708,22 @@ struct hook_table *get_queue_hooks( struct thread *thread )
+ void add_queue_hook_count( struct thread *thread, unsigned int index, int count )
+ {
+     if (!thread->queue) return;
+ 
+     SHARED_WRITE_BEGIN( thread->queue->shared, queue_shm_t )
+     {
+-        shared->hooks_count[index] += count;
++        int new_count = shared->hooks_count[index] + count;
++
++        if (new_count < 0)
++        {
++            fprintf( stderr, "wine: ignoring hook count underflow for thread %04x index %u count %d current %d\n",
++                     thread->id, index, count, shared->hooks_count[index] );
++            new_count = 0;
++        }
++        shared->hooks_count[index] = new_count;
+     }
+     SHARED_WRITE_END;
+ 
+     assert( thread->queue->shared->hooks_count[index] >= 0 );
+ }
+ 

@@ -118,29 +118,58 @@ mkdir -p "$LOGI_OMM_WINE_PREFIX"
 touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v3"
 export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$LOGI_OMM_WINE_EXE"
-bash "$script_dir/logi-omm-wine" --example
-assert_log "wine <$LOGI_OMM_WINE_EXE> <--example>"
-
-reset_fake_path
-bash "$script_dir/logi-omm-wine-stop"
-assert_log "wineserver <-k>"
+if bash "$script_dir/logi-omm-wine" --example >/dev/null 2>"$tmp_root/stderr"; then
+  fail "logi-omm-wine with legacy v3 marker should fail"
+fi
+assert_log ""
 
 reset_fake_path
 mkdir -p "$LOGI_OMM_WINE_PREFIX"
-touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v3"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v4"
+export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$LOGI_OMM_WINE_EXE"
+bash "$script_dir/logi-omm-wine" --example
+assert_log "wineserver <-k>
+wineserver <-w>
+wine <$LOGI_OMM_WINE_EXE> <--example>"
+
+reset_fake_path
+bash "$script_dir/logi-omm-wine-stop"
+assert_log "wineserver <-k>
+wineserver <-w>"
+
+reset_fake_path
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v4"
 bash "$script_dir/logi-omm-wine-init"
 assert_log ""
 
 reset_fake_path
 mkdir -p "$LOGI_OMM_WINE_PREFIX"
-touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v3"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v4"
+export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
+touch "$LOGI_OMM_WINE_EXE"
+bash "$script_dir/logi-omm-wine-init" --force >/dev/null
+assert_log "wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
+wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Direct3D> </v> <renderer> </t> <REG_SZ> </d> <gdi> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\X11 Driver> </v> <KeyboardScancodeDetect> </t> <REG_SZ> </d> <N> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Drivers> </v> <Graphics> </t> <REG_SZ> </d> <wayland,x11> </f>"
+
+reset_fake_path
+mkdir -p "$LOGI_OMM_WINE_PREFIX"
+touch "$LOGI_OMM_WINE_PREFIX/.logi-omm-wine-initialized-v4"
+export LOGI_OMM_WINE_REINSTALL=1
 export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$LOGI_OMM_WINE_EXE"
 bash "$script_dir/logi-omm-wine-init" --force >/dev/null
 assert_log "wineboot <-i>
-winetricks <-q> <remove_mono> <corefonts> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
+winetricks <-q> <remove_mono> <corefonts> <dotnet48> <vcrun2022> <win10>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
-wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
+wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Direct3D> </v> <renderer> </t> <REG_SZ> </d> <gdi> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\X11 Driver> </v> <KeyboardScancodeDetect> </t> <REG_SZ> </d> <N> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Drivers> </v> <Graphics> </t> <REG_SZ> </d> <wayland,x11> </f>"
 
 reset_fake_path
 if bash "$script_dir/logi-omm-wine-init" >/dev/null 2>"$tmp_root/stderr"; then
@@ -153,9 +182,12 @@ export LOGI_OMM_WINE_ALLOW_DOWNLOAD=1
 bash "$script_dir/logi-omm-wine-init" >/dev/null
 assert_log "curl
 wineboot <-i>
-winetricks <-q> <remove_mono> <corefonts> <dotnet48> <vcrun2022> <win10> <renderer=gdi>
+winetricks <-q> <remove_mono> <corefonts> <dotnet48> <vcrun2022> <win10>
 wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <Enable SDL> </t> <REG_DWORD> </d> <0> </f>
-wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>"
+wine <reg> <add> <HKLM\\System\\CurrentControlSet\\Services\\WineBus> </v> <DisableHidraw> </t> <REG_DWORD> </d> <0> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Direct3D> </v> <renderer> </t> <REG_SZ> </d> <gdi> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\X11 Driver> </v> <KeyboardScancodeDetect> </t> <REG_SZ> </d> <N> </f>
+wine <reg> <add> <HKCU\\Software\\Wine\\Drivers> </v> <Graphics> </t> <REG_SZ> </d> <wayland,x11> </f>"
 
 reset_fake_path
 export LOGI_OMM_WINE_ALLOW_DOWNLOAD=1

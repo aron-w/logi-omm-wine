@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export LOGI_OMM_WINE_DEBUG="${LOGI_OMM_WINE_DEBUG:-+plugplay,+hid,+hid_report,+setupapi,+winebus}"
+export LOGI_OMM_WINE_DEBUG="${LOGI_OMM_WINE_DEBUG:-+plugplay,+hid,+hid_report,+setupapi,+winebus,+key,+keyboard,+hook}"
 
 script_dir="$(
   cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1

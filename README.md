@@ -20,9 +20,18 @@ just init
 just run
 ```
 
-`just init` creates the Wine prefix, installs core fonts, `.NET 4.8`, and the Visual C++ runtime with `winetricks`, sets Windows 10 mode, selects Wine's GDI renderer, and configures WineBus to avoid SDL capture while leaving hidraw enabled. The current prefix contract marker is `.logi-omm-wine-initialized-v3`.
+`just init` creates the Wine prefix with stable Wine for winetricks compatibility, installs core fonts, `.NET 4.8`, and the Visual C++ runtime with `winetricks`, sets Windows 10 mode, selects Wine's GDI renderer directly through the registry, configures WineBus to avoid SDL capture while leaving hidraw enabled, enables Wine's Wayland graphics driver with X11 fallback, and disables Wine's X11 keyboard scancode auto-detection for more predictable evdev/libinput key capture. Normal runs use Wine staging full with a server-side hook counter patch for OMM key assignment. The current prefix contract marker is `.logi-omm-wine-initialized-v4`.
 
-`just run` never initializes or repairs the prefix. If the prefix marker is missing, it exits with a message telling you to run `logi-omm-wine-init`.
+For Wine runtime comparisons, the flake also exposes unpatched variants that reuse the same prefix:
+
+```sh
+nix run .#run-stable
+nix run .#run-unstable
+```
+
+`just run` never initializes or repairs the prefix. If the prefix marker is missing, it exits with a message telling you to run `logi-omm-wine-init`. Before launching, it stops stale processes in the dedicated prefix by default so an asserted wineserver from a previous key-capture attempt does not leak into the next run. Set `LOGI_OMM_WINE_CLEAN_START=0` to disable this. On Wayland sessions, it unsets `DISPLAY` before starting Wine so the Wayland driver is used instead of Xwayland; set `LOGI_OMM_WINE_FORCE_X11=1` to keep X11/Xwayland.
+
+`just repair` reapplies the current runtime registry settings when the current prefix marker already exists. Set `LOGI_OMM_WINE_REINSTALL=1` with `just repair` only when the prefix needs a full winetricks reinstall.
 
 ## Portable Runtime
 

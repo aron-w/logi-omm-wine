@@ -27,6 +27,24 @@ measuring text when the fresh Wine prefix has no suitable Windows fonts.
 Run `just repair` once after upgrading so the renderer and font settings are
 applied to an existing prefix.
 
+For an already-current prefix, `just repair` only reapplies runtime registry
+settings and skips winetricks. Use `LOGI_OMM_WINE_REINSTALL=1 just repair` only
+when the prefix needs a full dependency reinstall.
+
+`just repair` also reapplies Wine's X11 `KeyboardScancodeDetect=N` setting. This
+avoids Wine's unreliable scancode reconstruction path on modern evdev/libinput
+desktops and can help with high function keys such as F13 through F24. If the
+host desktop already binds one of those keys, remove that global shortcut first;
+otherwise the compositor may still handle the key while OMM is trying to capture
+it.
+
+The package uses Wine staging full, which includes `winewayland.drv`, and sets
+`HKCU\Software\Wine\Drivers` `Graphics=wayland,x11`. On Wayland sessions,
+`logi-omm-wine` also unsets `DISPLAY` before starting Wine because Wine's X11
+driver otherwise takes precedence when Xwayland is available. Set
+`LOGI_OMM_WINE_FORCE_X11=1` for a single run if native Wayland fails to create
+the window.
+
 Do not disable `dwmapi.dll`: OMM uses MahApps/ControlzEx and requires that DLL
 during startup.
 
@@ -58,7 +76,11 @@ If Wine gets stuck after OMM captures a keybinding and Ctrl-C does not close it,
 just stop
 ```
 
-This stops only the dedicated logi-omm-wine prefix, including orphaned Wine processes left behind after a wineserver assertion. OMM keybinding capture is implemented by `OnboardMemoryManager.Helpers.InterceptKeys` with a global `WH_KEYBOARD_LL` hook through `SetWindowsHookEx`; assigning the captured key can make Wine underflow its per-thread hook counter while removing that hook. Avoid saving keybindings from OMM on affected Wine versions.
+This stops only the dedicated logi-omm-wine prefix, including orphaned Wine processes left behind after a wineserver assertion. OMM keybinding capture is implemented by `OnboardMemoryManager.Helpers.InterceptKeys` with a global `WH_KEYBOARD_LL` hook through `SetWindowsHookEx`; assigning the captured key can make Wine underflow its per-thread hook counter while removing that hook. The default package carries a small Wine server patch that clamps this hook counter underflow instead of aborting the wineserver.
+
+Normal launches also perform this prefix-scoped cleanup before starting Wine. Set
+`LOGI_OMM_WINE_CLEAN_START=0` only when you intentionally want to attach to an
+already-running prefix.
 
 ## Wayland And X11
 
