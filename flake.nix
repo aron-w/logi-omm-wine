@@ -35,7 +35,7 @@
           pkgs = mkPkgs system;
           lib = pkgs.lib;
 
-          wine = pkgs.wineWow64Packages.staging;
+          wine = pkgs.wineWow64Packages.stable;
 
           ommExe = pkgs.fetchurl {
             url = ommUrl;
@@ -58,13 +58,13 @@
               export WINEDEBUG="''${OMME_WINEDEBUG:--all}"
               export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
-              marker="$WINEPREFIX/.omme-initialized"
+              marker="$WINEPREFIX/.omme-initialized-dotnet48"
 
               mkdir -p "$WINEPREFIX"
               wineboot -i
 
               if [ ! -e "$marker" ]; then
-                winetricks -q vcrun2022
+                winetricks -q remove_mono dotnet48 vcrun2022 win10
 
                 wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
                   /v 'Enable SDL' /t REG_DWORD /d 0 /f
@@ -89,7 +89,7 @@
               export WINEARCH=win64
               export WINEDEBUG="''${OMME_WINEDEBUG:--all}"
 
-              if [ ! -e "$WINEPREFIX/.omme-initialized" ]; then
+              if [ ! -e "$WINEPREFIX/.omme-initialized-dotnet48" ]; then
                 ${ommeInit}/bin/omme-init
               fi
 
@@ -202,7 +202,7 @@
               pkgs.just
               pkgs.systemd
               pkgs.winetricks
-              pkgs.wineWow64Packages.staging
+              pkgs.wineWow64Packages.stable
             ];
 
             OMME_VERSION = ommVersion;

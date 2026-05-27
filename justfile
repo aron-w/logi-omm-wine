@@ -9,8 +9,11 @@ workflow:
     @printf '%s\n' \
       'First time:' \
       '  direnv allow' \
-      '  just init' \
       '  just run' \
+      '' \
+      'Troubleshooting:' \
+      '  just init   # initialize or repair the Wine prefix without launching OMM' \
+      '  just debug  # launch with Wine HID debug logs' \
       '' \
       'Normal development:' \
       '  just check' \
@@ -47,7 +50,7 @@ fmt-check:
 develop:
     nix develop
 
-# Initialize the dedicated Wine prefix and install OMM runtime dependencies.
+# Initialize or repair the dedicated Wine prefix without launching OMM.
 init:
     nix run .#init
 
