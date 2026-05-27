@@ -32,11 +32,12 @@ The checked-in scripts define the runtime contract:
 - `logi-omm-wine-init` performs the slow, idempotent setup. Use `logi-omm-wine-init --force` to repair an existing prefix.
 - `logi-omm-wine-init-gui` opens `logi-omm-wine-init` in a terminal emulator for desktop launchers.
 - `logi-omm-wine-debug` enables Wine HID debug channels and delegates to `logi-omm-wine`.
+- `logi-omm-wine-stop` runs `wineserver -k` for only the dedicated prefix.
 - `udev/70-logi-omm-wine.rules` is the generic Logitech hidraw rule.
 
 Executable lookup checks `LOGI_OMM_WINE_EXE`, then `LOGI_OMM_WINE_DATA_DIR/OnboardMemoryManager.exe`, then `../share/logi-omm-wine/OnboardMemoryManager.exe` relative to the installed script, then the user cache. Runtime download is disabled unless `LOGI_OMM_WINE_ALLOW_DOWNLOAD=1` is set, and downloaded files are verified with SHA-256.
 
-Runtime dependencies are expected from `PATH`: `bash`, `wine`, `wineboot`, `winetricks`, `sha256sum`, and optionally `curl` for the explicit runtime download fallback.
+Runtime dependencies are expected from `PATH`: `bash`, `wine`, `wineboot`, `winetricks`, `sha256sum`, `grep`, and optionally `curl` for the explicit runtime download fallback.
 
 ## Distro Packaging
 

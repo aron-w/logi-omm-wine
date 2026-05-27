@@ -14,6 +14,7 @@ install:
 	install -Dm755 bin/logi-omm-wine-init "$(DESTDIR)$(BINDIR)/logi-omm-wine-init"
 	install -Dm755 bin/logi-omm-wine-init-gui "$(DESTDIR)$(BINDIR)/logi-omm-wine-init-gui"
 	install -Dm755 bin/logi-omm-wine-debug "$(DESTDIR)$(BINDIR)/logi-omm-wine-debug"
+	install -Dm755 bin/logi-omm-wine-stop "$(DESTDIR)$(BINDIR)/logi-omm-wine-stop"
 	install -Dm644 udev/70-logi-omm-wine.rules "$(DESTDIR)$(UDEVDIR)/70-logi-omm-wine.rules"
 	install -Dm644 share/applications/logi-omm-wine.desktop "$(DESTDIR)$(APPLICATIONSDIR)/logi-omm-wine.desktop"
 	install -Dm644 share/applications/logi-omm-wine-init.desktop "$(DESTDIR)$(APPLICATIONSDIR)/logi-omm-wine-init.desktop"

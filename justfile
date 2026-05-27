@@ -21,6 +21,7 @@ workflow:
       'If the mouse is not visible:' \
       '  just reload-udev' \
       '  just debug' \
+      '  just stop' \
       '' \
       'Before publishing changes:' \
       '  just test' \
@@ -54,13 +55,17 @@ run:
 debug:
     nix run .#debug
 
+# Stop only the dedicated logi-omm-wine Wine prefix.
+stop:
+    nix run .#stop
+
 # Enter the development shell with Wine, winetricks, just, and udev tools.
 develop:
     nix develop
 
 # Run local shell syntax and fake-PATH runtime contract tests.
 test:
-    bash -n bin/logi-omm-wine bin/logi-omm-wine-init bin/logi-omm-wine-init-gui bin/logi-omm-wine-debug tests/runtime-contract.sh
+    bash -n bin/logi-omm-wine bin/logi-omm-wine-init bin/logi-omm-wine-init-gui bin/logi-omm-wine-debug bin/logi-omm-wine-stop tests/runtime-contract.sh
     tests/runtime-contract.sh
 
 # Evaluate flake outputs, package checks, and the NixOS module.

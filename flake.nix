@@ -67,6 +67,7 @@
               install -Dm755 ${./bin/logi-omm-wine-init} "$out/bin/logi-omm-wine-init"
               install -Dm755 ${./bin/logi-omm-wine-init-gui} "$out/bin/logi-omm-wine-init-gui"
               install -Dm755 ${./bin/logi-omm-wine-debug} "$out/bin/logi-omm-wine-debug"
+              install -Dm755 ${./bin/logi-omm-wine-stop} "$out/bin/logi-omm-wine-stop"
 
               mkdir -p "$out/share/logi-omm-wine"
               cp ${ommExe} "$out/share/logi-omm-wine/OnboardMemoryManager.exe"
@@ -107,6 +108,15 @@
                     wine
                   ]
                 }
+              wrapProgram "$out/bin/logi-omm-wine-stop" \
+                --prefix PATH : ${
+                  lib.makeBinPath [
+                    pkgs.bash
+                    pkgs.coreutils
+                    pkgs.gnugrep
+                    wine
+                  ]
+                }
 
               runHook postInstall
             '';
@@ -135,6 +145,7 @@
             ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-init}
             ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-init-gui}
             ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-debug}
+            ${pkgs.bash}/bin/bash -n ${./bin/logi-omm-wine-stop}
             LOGI_OMM_WINE_TEST_BIN_DIR=${./bin} ${pkgs.bash}/bin/bash ${./tests/runtime-contract.sh}
             touch $out
           '';
@@ -156,6 +167,11 @@
           type = "app";
           program = "${self.packages.${system}.default}/bin/logi-omm-wine-debug";
           meta.description = "Run logi-omm-wine with Wine HID debug logging";
+        };
+        stop = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/logi-omm-wine-stop";
+          meta.description = "Stop the logi-omm-wine Wine prefix";
         };
       });
 

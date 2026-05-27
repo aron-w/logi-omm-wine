@@ -39,31 +39,38 @@ reset_fake_path() {
   export PATH="$tmp_root/bin:$base_path"
   unset LOGI_OMM_WINE_EXE LOGI_OMM_WINE_DATA_DIR LOGI_OMM_WINE_ALLOW_DOWNLOAD LOGI_OMM_WINE_DEBUG
 
-  write_fake "$tmp_root/bin/wine" <<'EOF'
+  write_fake "$tmp_root/bin/wine" <<'FAKE'
 printf 'wine' >>"$TEST_LOG"
 for arg in "$@"; do
   printf ' <%s>' "$arg" >>"$TEST_LOG"
 done
 printf '\n' >>"$TEST_LOG"
-EOF
-  write_fake "$tmp_root/bin/wineboot" <<'EOF'
+FAKE
+  write_fake "$tmp_root/bin/wineboot" <<'FAKE'
 printf 'wineboot' >>"$TEST_LOG"
 for arg in "$@"; do
   printf ' <%s>' "$arg" >>"$TEST_LOG"
 done
 printf '\n' >>"$TEST_LOG"
-EOF
-  write_fake "$tmp_root/bin/winetricks" <<'EOF'
+FAKE
+  write_fake "$tmp_root/bin/winetricks" <<'FAKE'
 printf 'winetricks' >>"$TEST_LOG"
 for arg in "$@"; do
   printf ' <%s>' "$arg" >>"$TEST_LOG"
 done
 printf '\n' >>"$TEST_LOG"
-EOF
-  write_fake "$tmp_root/bin/sha256sum" <<'EOF'
+FAKE
+  write_fake "$tmp_root/bin/wineserver" <<'FAKE'
+printf 'wineserver' >>"$TEST_LOG"
+for arg in "$@"; do
+  printf ' <%s>' "$arg" >>"$TEST_LOG"
+done
+printf '\n' >>"$TEST_LOG"
+FAKE
+  write_fake "$tmp_root/bin/sha256sum" <<'FAKE'
 printf '%s  %s\n' "$TEST_SHA256SUM" "$1"
-EOF
-  write_fake "$tmp_root/bin/curl" <<'EOF'
+FAKE
+  write_fake "$tmp_root/bin/curl" <<'FAKE'
 printf 'curl' >>"$TEST_LOG"
 while [ "$#" -gt 0 ]; do
   if [ "$1" = "-o" ]; then
@@ -74,7 +81,7 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 printf '\n' >>"$TEST_LOG"
-EOF
+FAKE
 
   export TEST_LOG="$tmp_root/log"
   export TEST_SHA256SUM="aec76587f1d07c51667c140c730a38f82675fbe2d898e79413372146b9632358"
@@ -113,6 +120,10 @@ export LOGI_OMM_WINE_EXE="$tmp_root/OnboardMemoryManager.exe"
 touch "$LOGI_OMM_WINE_EXE"
 bash "$script_dir/logi-omm-wine" --example
 assert_log "wine <$LOGI_OMM_WINE_EXE> <--example>"
+
+reset_fake_path
+bash "$script_dir/logi-omm-wine-stop"
+assert_log "wineserver <-k>"
 
 reset_fake_path
 mkdir -p "$LOGI_OMM_WINE_PREFIX"

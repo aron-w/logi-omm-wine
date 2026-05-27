@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+wineprefix="${LOGI_OMM_WINE_PREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/logi-omm-wine/prefix}"
+
+export WINEPREFIX="$wineprefix"
+export WINEARCH=win64
+export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
+
+wineserver -k || true
+
+for environ in /proc/[0-9]*/environ; do
+  [ -r "$environ" ] || continue
+  pid="${environ%/environ}"
+  pid="${pid##*/}"
+  if { tr '\0' '\n' <"$environ"; } 2>/dev/null | grep -Fxq "WINEPREFIX=$wineprefix"; then
+    kill "$pid" 2>/dev/null || true
+  fi
+done

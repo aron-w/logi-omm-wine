@@ -50,6 +50,16 @@ receivers expose different product IDs and OMM needs hidraw access through Wine.
 Distribution maintainers may choose to narrow this rule to a tested device list
 if their policy requires product-specific hidraw permissions.
 
+## Keyboard Capture Hangs
+
+If Wine gets stuck after OMM captures a keybinding and Ctrl-C does not close it, run:
+
+```sh
+just stop
+```
+
+This stops only the dedicated logi-omm-wine prefix, including orphaned Wine processes left behind after a wineserver assertion. OMM keybinding capture is implemented by `OnboardMemoryManager.Helpers.InterceptKeys` with a global `WH_KEYBOARD_LL` hook through `SetWindowsHookEx`; assigning the captured key can make Wine underflow its per-thread hook counter while removing that hook. Avoid saving keybindings from OMM on affected Wine versions.
+
 ## Wayland And X11
 
 Wine still depends on the host desktop stack. If OMM behaves differently across
