@@ -175,10 +175,17 @@
         default = {
           type = "app";
           program = "${self.packages.${system}.default}/bin/omme";
+          meta.description = "Run Logitech Onboard Memory Manager through Wine";
+        };
+        init = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/omme-init";
+          meta.description = "Initialize the OMME Wine prefix";
         };
         debug = {
           type = "app";
           program = "${self.packages.${system}.default}/bin/omme-debug";
+          meta.description = "Run OMME with Wine HID debug logging";
         };
       });
 
@@ -190,6 +197,7 @@
         {
           default = pkgs.mkShell {
             packages = [
+              self.packages.${system}.default
               pkgs.direnv
               pkgs.just
               pkgs.systemd

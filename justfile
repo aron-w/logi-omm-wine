@@ -49,15 +49,15 @@ develop:
 
 # Initialize the dedicated Wine prefix and install OMM runtime dependencies.
 init:
-    omme-init
+    nix run .#init
 
 # Run Logitech Onboard Memory Manager through Wine.
 run:
-    omme
+    nix run .#
 
 # Run OMM with Wine HID, plug-and-play, setupapi, and winebus debug logs.
 debug:
-    omme-debug
+    nix run .#debug
 
 # Reload local udev rules and retrigger hidraw devices; requires sudo.
 reload-udev:
