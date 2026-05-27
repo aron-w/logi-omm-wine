@@ -2,7 +2,7 @@
 set -euo pipefail
 
 omme_version="2.6.1749"
-init_contract_version="v2"
+init_contract_version="v3"
 exe_hash="aec76587f1d07c51667c140c730a38f82675fbe2d898e79413372146b9632358"
 exe_name="OnboardMemoryManager.exe"
 download_name="OnboardMemoryManager_${omme_version}.exe"
@@ -121,7 +121,7 @@ export WINEDEBUG="${LOGI_OMM_WINE_DEBUG:--all}"
 export WINETRICKS_LATEST_VERSION_CHECK=disabled
 
 wineboot -i
-winetricks -q remove_mono dotnet48 vcrun2022 win10 renderer=gdi
+winetricks -q remove_mono corefonts dotnet48 vcrun2022 win10 renderer=gdi
 
 wine reg add 'HKLM\System\CurrentControlSet\Services\WineBus' \
   /v 'Enable SDL' /t REG_DWORD /d 0 /f

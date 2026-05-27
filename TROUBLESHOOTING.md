@@ -8,7 +8,8 @@
 just init
 ```
 
-If the prefix was created by an older logi-omm-wine release or the window flickers, run:
+If the prefix was created by an older logi-omm-wine release, the window flickers,
+or the app exits during WPF text layout, run:
 
 ```sh
 just repair
@@ -20,8 +21,11 @@ The current initialization contract selects Wine's GDI renderer because OMM's WP
 interface can flicker or become translucent with accelerated renderers on some
 GPU/compositor combinations.
 
-Run `just repair` once after upgrading so the renderer setting is applied to an
-existing prefix.
+The init contract also installs core fonts because WPF can fail fast while
+measuring text when the fresh Wine prefix has no suitable Windows fonts.
+
+Run `just repair` once after upgrading so the renderer and font settings are
+applied to an existing prefix.
 
 Do not disable `dwmapi.dll`: OMM uses MahApps/ControlzEx and requires that DLL
 during startup.

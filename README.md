@@ -20,7 +20,7 @@ just init
 just run
 ```
 
-`just init` creates the Wine prefix, installs `.NET 4.8` and the Visual C++ runtime with `winetricks`, sets Windows 10 mode, selects Wine's GDI renderer, and configures WineBus to avoid SDL capture while leaving hidraw enabled. The current prefix contract marker is `.logi-omm-wine-initialized-v2`.
+`just init` creates the Wine prefix, installs core fonts, `.NET 4.8`, and the Visual C++ runtime with `winetricks`, sets Windows 10 mode, selects Wine's GDI renderer, and configures WineBus to avoid SDL capture while leaving hidraw enabled. The current prefix contract marker is `.logi-omm-wine-initialized-v3`.
 
 `just run` never initializes or repairs the prefix. If the prefix marker is missing, it exits with a message telling you to run `logi-omm-wine-init`.
 
